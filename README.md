@@ -4,7 +4,7 @@ Plataforma de jogos de corrida infinita (estilo Subway Surfers / Temple Run) com
 
 O primeiro jogo é **Mamel: Castelo Celeste**: 3 pistas, pular, deslizar, moedas, power-ups (ímã, escudo, x2) e 3 vidas.
 
-Personagens jogáveis: **Manu**, **Mel**, **Sara** e **Gil** (a escolha fica salva no navegador).
+Personagens jogáveis: **Manu**, **Mel**, **Sara** e **Gilmar** (a escolha fica salva no navegador).
 
 ## Rodar
 

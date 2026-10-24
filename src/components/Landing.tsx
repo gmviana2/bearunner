@@ -118,7 +118,7 @@ export default function Landing() {
       <section id="personagens" className="section">
         <div className="section-head">
           <h2>Escolha sua personagem</h2>
-          <p>Quatro corredoras, cada uma com seu estilo. Quem vai com você?</p>
+          <p>Quatro amigos, cada um com seu estilo. Quem vai correr com você?</p>
         </div>
         <div className="characters">
           {CHARACTERS.map((c) => (
