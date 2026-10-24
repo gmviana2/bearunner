@@ -2,7 +2,7 @@
 
 Plataforma de jogos de corrida infinita (estilo Subway Surfers / Temple Run) com visual chibi.
 
-O primeiro jogo é **Lívia Run: Castelo Celeste**: 3 pistas, pular, deslizar, moedas, power-ups (ímã, escudo, x2) e 3 vidas.
+O primeiro jogo é **Mamel: Castelo Celeste**: 3 pistas, pular, deslizar, moedas, power-ups (ímã, escudo, x2) e 3 vidas.
 
 ## Rodar
 
@@ -17,7 +17,7 @@ npm run build    # gera dist/ (site estático)
 - `src/components/Landing.tsx`: landing page com o catálogo de jogos
 - `src/components/GameScreen.tsx`: tela do jogo (Phaser + HUD em React)
 - `src/game/RunnerScene.ts`: o runner pseudo-3D (projeção em perspectiva, spawn, colisões)
-- `src/game/textures.ts`: arte procedural (Lívia, obstáculos, moedas, cenário) desenhada em Canvas
+- `src/game/textures.ts`: arte procedural (Mamel, obstáculos, moedas, cenário) desenhada em Canvas
 - `src/games.ts`: catálogo de jogos (adicione novos jogos/mundos aqui)
 - `public/art/`: artes conceituais usadas na landing
 

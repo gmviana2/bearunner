@@ -73,10 +73,10 @@ function star(ctx: Ctx, cx: number, cy: number, R: number, r: number, fill: stri
   }
 }
 
-export type LiviaPose = 'run1' | 'run2' | 'jump' | 'slide';
+export type MamelPose = 'run1' | 'run2' | 'jump' | 'slide';
 
-/** Lívia seen from behind, chibi proportions. Canvas 128x160, feet at y≈158. */
-function drawLivia(ctx: Ctx, pose: LiviaPose) {
+/** Mamel seen from behind, chibi proportions. Canvas 128x160, feet at y≈158. */
+function drawMamel(ctx: Ctx, pose: MamelPose) {
   const slide = pose === 'slide';
   const jump = pose === 'jump';
   const r1 = pose === 'run1';
@@ -521,8 +521,8 @@ function drawSky(ctx: Ctx) {
 }
 
 export function createTextures(scene: Phaser.Scene) {
-  (['run1', 'run2', 'jump', 'slide'] as LiviaPose[]).forEach((pose) =>
-    make(scene, `livia-${pose}`, 128, 160, (ctx) => drawLivia(ctx, pose)),
+  (['run1', 'run2', 'jump', 'slide'] as MamelPose[]).forEach((pose) =>
+    make(scene, `mamel-${pose}`, 128, 160, (ctx) => drawMamel(ctx, pose)),
   );
   make(scene, 'coin', 64, 64, drawCoin);
   make(scene, 'barrier', 160, 112, drawBarrier);

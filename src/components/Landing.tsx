@@ -42,7 +42,7 @@ export default function Landing() {
         <div className="hero-text">
           <span className="badge">✨ Novo · protótipo jogável</span>
           <h1>
-            Corra, pule e <span className="grad">brilhe</span> com a Lívia!
+            Corra, pule e <span className="grad">brilhe</span> com a Mamel!
           </h1>
           <p>
             BeaRunner é uma plataforma de jogos de corrida infinita no estilo chibi: mundos mágicos,
@@ -60,9 +60,9 @@ export default function Landing() {
         </div>
         <div className="hero-art">
           <div className="hero-frame">
-            <img src={ART.hero} alt="Lívia correndo pela ponte do Castelo Celeste" />
+            <img src={ART.hero} alt="Mamel correndo pela ponte do Castelo Celeste" />
           </div>
-          <img className="hero-livia" src={ART.livia} alt="" />
+          <img className="hero-mamel" src={ART.mamel} alt="" />
           <span className="float-coin c1">⭐</span>
           <span className="float-coin c2">💎</span>
           <span className="float-coin c3">⭐</span>
@@ -115,17 +115,17 @@ export default function Landing() {
 
       <section id="personagem" className="section character">
         <div className="char-art">
-          <img src={ART.livia} alt="Lívia, a heroína chibi" />
+          <img src={ART.mamel} alt="Mamel, a heroína chibi" />
         </div>
         <div className="char-text">
           <span className="badge">Personagem</span>
-          <h2>Conheça a Lívia</h2>
+          <h2>Conheça a Mamel</h2>
           <p>
             Determinada, alegre e sempre em busca de novas aventuras. Com sua mochila de estrela e o
             rabo de cavalo com mecha rosa, ela corre por mundos mágicos atrás de fragmentos de energia.
           </p>
           <h4>Visuais para desbloquear</h4>
-          <img className="visuals" src={ART.visuals} alt="Quatro visuais alternativos da Lívia" loading="lazy" />
+          <img className="visuals" src={ART.visuals} alt="Quatro visuais alternativos da Mamel" loading="lazy" />
         </div>
       </section>
 

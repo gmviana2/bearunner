@@ -99,7 +99,7 @@ export default function GameScreen({ gameId }: { gameId: string }) {
 
       <div className="hud">
         <div className="hud-left">
-          <img className="hud-avatar" src={ART.livia} alt="Lívia" />
+          <img className="hud-avatar" src={ART.mamel} alt="Mamel" />
           <div className="hud-stats">
             <div className="hud-pill score">
               {hud.score.toLocaleString('pt-BR')}
@@ -141,7 +141,7 @@ export default function GameScreen({ gameId }: { gameId: string }) {
       {phase === 'ready' && (
         <div className="overlay">
           <div className="card">
-            <img className="card-hero" src={ART.livia} alt="" />
+            <img className="card-hero" src={ART.mamel} alt="" />
             <h2>{game.title}</h2>
             <p className="muted">{game.subtitle}</p>
             <ul className="controls">

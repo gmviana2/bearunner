@@ -107,7 +107,7 @@ export class RunnerScene extends Phaser.Scene {
     this.ground = this.add.graphics().setDepth(0);
     this.haze = this.add.image(0, 0, 'haze').setOrigin(0, 0).setDepth(1).setAlpha(0.9);
     this.shadow = this.add.image(0, 0, 'shadow');
-    this.player = this.add.image(0, 0, 'livia-run1').setOrigin(0.5, 0.985);
+    this.player = this.add.image(0, 0, 'mamel1').setOrigin(0.5, 0.985);
     this.shieldFx = this.add.image(0, 0, 'shieldFx').setVisible(false);
 
     this.layout();
@@ -533,12 +533,12 @@ export class RunnerScene extends Phaser.Scene {
 
     // player
     const running = this.phase === 'running';
-    let tex = 'livia-run1';
-    if (this.airborne) tex = 'livia-jump';
-    else if (this.slideT > 0) tex = 'livia-slide';
+    let tex = 'mamel1';
+    if (this.airborne) tex = 'mamel-jump';
+    else if (this.slideT > 0) tex = 'mamel-slide';
     else if (running || this.phase === 'ready') {
       const period = running ? 0.13 * (START_SPEED / this.speed) + 0.05 : 0.35;
-      tex = Math.floor(this.animT / period) % 2 ? 'livia-run2' : 'livia-run1';
+      tex = Math.floor(this.animT / period) % 2 ? 'mamel2' : 'mamel1';
     }
     this.player.setTexture(tex);
     const bob = !this.airborne && this.slideT <= 0 && running ? Math.abs(Math.sin(this.animT * 18)) * 0.04 : 0;

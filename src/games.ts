@@ -13,8 +13,8 @@ const art = (name: string) => `${import.meta.env.BASE_URL}art/${name}.jpg`;
 
 export const GAMES: GameInfo[] = [
   {
-    id: 'livia-run',
-    title: 'Lívia Run',
+    id: 'mamel',
+    title: 'Mamel',
     subtitle: 'Castelo Celeste',
     description: 'Corra pelas pontes flutuantes do Castelo Celeste, desvie de trens, pule barreiras e colete estrelas!',
     cover: art('castelo'),
@@ -24,7 +24,7 @@ export const GAMES: GameInfo[] = [
   },
   {
     id: 'floresta',
-    title: 'Lívia Run',
+    title: 'Mamel',
     subtitle: 'Floresta Encantada',
     description: 'Natureza, pontes de madeira e criaturas mágicas.',
     cover: art('floresta'),
@@ -34,7 +34,7 @@ export const GAMES: GameInfo[] = [
   },
   {
     id: 'deserto',
-    title: 'Lívia Run',
+    title: 'Mamel',
     subtitle: 'Deserto Dourado',
     description: 'Ruínas antigas, areia e plataformas móveis.',
     cover: art('deserto'),
@@ -44,7 +44,7 @@ export const GAMES: GameInfo[] = [
   },
   {
     id: 'gelo',
-    title: 'Lívia Run',
+    title: 'Mamel',
     subtitle: 'Reino de Gelo',
     description: 'Pisos escorregadios, cristais e pontes de gelo.',
     cover: art('gelo'),
@@ -54,7 +54,7 @@ export const GAMES: GameInfo[] = [
   },
   {
     id: 'vulcao',
-    title: 'Lívia Run',
+    title: 'Mamel',
     subtitle: 'Vulcão Adormecido',
     description: 'Lava, pedras caindo e desafios de tempo.',
     cover: art('vulcao'),
@@ -72,6 +72,6 @@ export const EVENTS = [
 
 export const ART = {
   hero: art('hero'),
-  livia: art('livia'),
+  mamel: art('mamel'),
   visuals: art('visuals'),
 };
