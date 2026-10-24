@@ -592,6 +592,74 @@ function drawSky(ctx: Ctx) {
   for (let i = 0; i < 9; i++) drawCloud(ctx, i * 128 - 20, H - 10 - (i % 2) * 14, 1.1, 1);
 }
 
+/** Cute chibi T-rex seen from behind (it chases the runner). Canvas 200x220. */
+function drawDino(ctx: Ctx) {
+  const green = '#6fd14f';
+  const greenD = '#3f9a2e';
+  const plate = '#ff8fb8';
+  const plateD = '#e5608f';
+
+  // stubby legs
+  rr(ctx, 46, 168, 34, 48, 14, greenD);
+  rr(ctx, 120, 168, 34, 48, 14, greenD);
+  // tiny arms reaching out to grab
+  for (const dir of [-1, 1]) {
+    ctx.save();
+    ctx.translate(100 + dir * 66, 104);
+    ctx.rotate(dir * -0.5);
+    rr(ctx, -9, -26, 18, 34, 9, green);
+    for (const cx of [-6, 0, 6]) circle(ctx, cx, -27, 3.5, '#ffffff');
+    ctx.restore();
+  }
+  // body
+  const body = ctx.createRadialGradient(84, 96, 10, 100, 130, 90);
+  body.addColorStop(0, '#9be77a');
+  body.addColorStop(0.6, green);
+  body.addColorStop(1, greenD);
+  ellipse(ctx, 100, 136, 66, 66, '#000');
+  ctx.fillStyle = body;
+  ctx.fill();
+  // head
+  const head = ctx.createRadialGradient(88, 34, 6, 100, 56, 54);
+  head.addColorStop(0, '#a6ec88');
+  head.addColorStop(0.7, green);
+  head.addColorStop(1, greenD);
+  ellipse(ctx, 100, 58, 50, 44, '#000');
+  ctx.fillStyle = head;
+  ctx.fill();
+  // eyes peeking out on the sides of the head
+  for (const dir of [-1, 1]) {
+    circle(ctx, 100 + dir * 46, 46, 11, '#ffffff');
+    circle(ctx, 100 + dir * 49, 47, 6, '#2a1d4f');
+    circle(ctx, 100 + dir * 47, 44, 2, '#ffffff');
+  }
+  // back plates down the spine
+  const plates: [number, number][] = [
+    [18, 9], [42, 11], [70, 13], [100, 14], [130, 12], [156, 10],
+  ];
+  for (const [y, r] of plates) {
+    ctx.beginPath();
+    ctx.moveTo(100 - r, y + r * 0.8);
+    ctx.quadraticCurveTo(100, y - r * 1.6, 100 + r, y + r * 0.8);
+    ctx.closePath();
+    ctx.fillStyle = plate;
+    ctx.fill();
+    ctx.strokeStyle = plateD;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+  // spots
+  for (const [x, y, r] of [[70, 120, 7], [134, 140, 9], [80, 168, 6], [124, 100, 5]]) circle(ctx, x, y, r, 'rgba(63,154,46,0.55)');
+  // tail coming toward the camera
+  const tail = ctx.createRadialGradient(100, 190, 4, 100, 196, 30);
+  tail.addColorStop(0, '#8fe06c');
+  tail.addColorStop(1, greenD);
+  ellipse(ctx, 100, 196, 30, 22, '#000');
+  ctx.fillStyle = tail;
+  ctx.fill();
+  star(ctx, 100, 194, 7, 3, plate);
+}
+
 export function createTextures(scene: Phaser.Scene) {
   for (const ch of CHARACTERS) {
     (['run1', 'run2', 'jump', 'slide'] as RunnerPose[]).forEach((pose) =>
@@ -607,6 +675,8 @@ export function createTextures(scene: Phaser.Scene) {
   make(scene, 'magnet', 72, 72, (ctx) => drawPower(ctx, 'magnet'));
   make(scene, 'shield', 72, 72, (ctx) => drawPower(ctx, 'shield'));
   make(scene, 'double', 72, 72, (ctx) => drawPower(ctx, 'double'));
+  make(scene, 'dino', 200, 220, drawDino);
+  make(scene, 'gap', 4, 4, () => {});
   make(scene, 'tree', 160, 220, drawTree);
   make(scene, 'lamp', 48, 200, drawLamp);
   make(scene, 'sky', 1024, 640, drawSky);

@@ -5,7 +5,8 @@ export type PowerKind = 'magnet' | 'shield' | 'double';
 export interface HudState {
   score: number;
   coins: number;
-  lives: number;
+  /** Fraction of the dinosaur chase left (0 = not being chased). */
+  chase: number;
   mult: number;
   powers: { kind: PowerKind; left: number; total: number }[];
 }

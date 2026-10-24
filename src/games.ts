@@ -16,10 +16,10 @@ export const GAMES: GameInfo[] = [
     id: 'mamel',
     title: 'Mamel',
     subtitle: 'Castelo Celeste',
-    description: 'Corra pelas pontes flutuantes do Castelo Celeste, desvie de trens, pule barreiras e colete estrelas!',
+    description: 'Fuja do dinossauro pelas pontes flutuantes do Castelo Celeste: desvie de trens, pule barreiras e buracos e colete estrelas!',
     cover: art('castelo'),
     status: 'playable',
-    tags: ['Corrida infinita', '3 vidas', 'Power-ups'],
+    tags: ['Corrida infinita', 'Fuja do dinossauro', 'Power-ups'],
     accent: '#9b6cff',
   },
   {

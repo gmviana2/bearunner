@@ -9,7 +9,7 @@ const HOW_TO = [
   { icon: '↔️', title: 'Troque de pista', text: 'Setas ← → ou deslize para os lados.' },
   { icon: '⬆️', title: 'Pule', text: 'Seta ↑, espaço ou deslize para cima.' },
   { icon: '⬇️', title: 'Deslize', text: 'Seta ↓ ou deslize para baixo.' },
-  { icon: '⭐', title: 'Colete', text: 'Moedas valem pontos. Não perca as 3 vidas!' },
+  { icon: '🦖', title: 'Fuja do dino', text: 'Tropeçou? Ele vem atrás. Tropeçou de novo, ele te pega!' },
 ];
 
 const OBSTACLES = [
@@ -17,6 +17,7 @@ const OBSTACLES = [
   { icon: '🪵', name: 'Viga', tip: 'Deslize por baixo' },
   { icon: '📦', name: 'Caixa', tip: 'Desvie ou pule alto' },
   { icon: '🚆', name: 'Trem', tip: 'Troque de pista!' },
+  { icon: '🕳️', name: 'Buraco', tip: 'Pule ou você cai!' },
 ];
 
 const POWERS = [
@@ -48,7 +49,7 @@ export default function Landing() {
           </h1>
           <p>
             BeaRunner é uma plataforma de jogos de corrida infinita no estilo chibi: mundos mágicos,
-            obstáculos divertidos, power-ups e muita fofura. Direto no navegador, no PC ou no celular.
+            obstáculos divertidos, um dinossauro faminto na sua cola e muita fofura. Direto no navegador, no PC ou no celular.
           </p>
           <div className="hero-cta">
             <a className="btn btn-primary big" href={`#/jogar/${playable[0].id}`}>▶ Jogar agora</a>

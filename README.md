@@ -2,7 +2,7 @@
 
 Plataforma de jogos de corrida infinita (estilo Subway Surfers / Temple Run) com visual chibi.
 
-O primeiro jogo é **Mamel: Castelo Celeste**: 3 pistas, pular, deslizar, moedas, power-ups (ímã, escudo, x2) e 3 vidas.
+O primeiro jogo é **Mamel: Castelo Celeste**: 3 pistas, pular, deslizar, moedas, power-ups (ímã, escudo, x2) e um dinossauro: no primeiro tropeço (bater, cair num buraco…) ele aparece e persegue por alguns segundos; tropeçar de novo enquanto ele persegue é fim de jogo.
 
 Personagens jogáveis: **Manu**, **Mel**, **Sara** e **Gilmar** (a escolha fica salva no navegador).
 

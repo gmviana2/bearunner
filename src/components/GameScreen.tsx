@@ -34,7 +34,7 @@ export default function GameScreen({ gameId }: { gameId: string }) {
   const host = useRef<HTMLDivElement>(null);
   const game = GAMES.find((g) => g.id === gameId);
   const [phase, setPhase] = useState<GamePhase>('ready');
-  const [hud, setHud] = useState<HudState>({ score: 0, coins: 0, lives: 3, mult: 1, powers: [] });
+  const [hud, setHud] = useState<HudState>({ score: 0, coins: 0, chase: 0, mult: 1, powers: [] });
   const [result, setResult] = useState<(GameOverInfo & { best: number; record: boolean }) | null>(null);
   const [hurt, setHurt] = useState(false);
   const [best, setBest] = useState(() => readBest(gameId));
@@ -60,8 +60,8 @@ export default function GameScreen({ gameId }: { gameId: string }) {
     };
     const onOver = (info: GameOverInfo) => {
       const prev = readBest(gameId);
-      const record = info.score > prev;
-      if (record) writeBest(gameId, info.score);
+      const record = prev > 0 && info.score > prev;
+      if (info.score > prev) writeBest(gameId, info.score);
       setBest(Math.max(prev, info.score));
       setResult({ ...info, best: Math.max(prev, info.score), record });
     };
@@ -103,7 +103,7 @@ export default function GameScreen({ gameId }: { gameId: string }) {
   }
 
   return (
-    <div className={`game-screen ${hurt ? 'hurt' : ''}`}>
+    <div className={`game-screen ${hurt ? 'hurt' : ''} ${hud.chase > 0 && phase === 'running' ? 'chased' : ''}`}>
       <div ref={host} className="game-host" />
 
       <div className="hud">
@@ -117,11 +117,12 @@ export default function GameScreen({ gameId }: { gameId: string }) {
             <div className="hud-pill coins">
               <span className="coin-dot" /> {hud.coins}
             </div>
-            <div className="hearts" aria-label={`${hud.lives} vidas`}>
-              {[0, 1, 2].map((i) => (
-                <span key={i} className={i < hud.lives ? 'heart' : 'heart lost'}>❤</span>
-              ))}
-            </div>
+            {hud.chase > 0 && phase !== 'over' && (
+              <div className="chase" role="status">
+                <span>🦖 Fuja!</span>
+                <i style={{ width: `${hud.chase * 100}%` }} />
+              </div>
+            )}
           </div>
         </div>
         {phase === 'running' && (
@@ -172,6 +173,7 @@ export default function GameScreen({ gameId }: { gameId: string }) {
               <li><b>← →</b> ou deslize para os lados: trocar de pista</li>
               <li><b>↑ / espaço</b> ou deslize p/ cima: pular barreiras</li>
               <li><b>↓</b> ou deslize p/ baixo: deslizar sob as vigas</li>
+              <li>🦖 Tropeçou? O dinossauro vem atrás! Tropeçar de novo enquanto ele persegue é fim de jogo.</li>
             </ul>
             <button className="btn btn-primary big" onClick={() => send('start')}>Correr com {hero.name} ▶</button>
             {best > 0 && <p className="muted small">Seu recorde: {best.toLocaleString('pt-BR')}</p>}
@@ -194,7 +196,8 @@ export default function GameScreen({ gameId }: { gameId: string }) {
       {phase === 'over' && result && (
         <div className="overlay">
           <div className="card">
-            <h2>{result.record ? 'Novo recorde! 🏆' : 'Fim de corrida!'}</h2>
+            <h2>{result.record ? 'Novo recorde! 🏆' : 'O dinossauro te pegou! 🦖'}</h2>
+            {result.record && <p className="muted">O dinossauro te pegou, mas você foi longe!</p>}
             <div className="result-grid">
               <div><span>Pontos</span><b>{result.score.toLocaleString('pt-BR')}</b></div>
               <div><span>Moedas</span><b>{result.coins}</b></div>

@@ -19,17 +19,20 @@ const ACCEL = 0.22;
 const GRAVITY = 30;
 const JUMP_V = 9;
 const SLIDE_TIME = 0.65;
-const INVULN_TIME = 1.6;
-const START_LIVES = 3;
+const STUMBLE_GRACE = 1.0; // invulnerable time right after a stumble
+const CHASE_TIME = 8; // how long the dinosaur chases after a stumble
+const DINO_Z = 2.1; // the dinosaur runs between the camera and the player
+const DINO_H = 1.6;
 const POWER_TIME: Record<PowerKind, number> = { magnet: 10, shield: 15, double: 10 };
 
-type ObstacleKind = 'barrier' | 'beam' | 'crate' | 'train';
+type ObstacleKind = 'barrier' | 'beam' | 'crate' | 'train' | 'gap';
 
 const OBSTACLES: Record<ObstacleKind, { h: number; depth: number; len?: number }> = {
   barrier: { h: 0.72, depth: 0.3 }, // jump over
   beam: { h: 1.45, depth: 0.3 }, // slide under
   crate: { h: 0.9, depth: 0.9 }, // dodge or high jump
   train: { h: 1.5, depth: 0.5, len: 8 }, // dodge
+  gap: { h: 0, depth: 1.6 }, // hole in the bridge: jump over it
 };
 
 interface Entity {
@@ -68,6 +71,8 @@ export class RunnerScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Image;
   private shadow!: Phaser.GameObjects.Image;
   private shieldFx!: Phaser.GameObjects.Image;
+  private dino!: Phaser.GameObjects.Image;
+  private roar!: Phaser.GameObjects.Text;
 
   private entities: Entity[] = [];
   private phase: GamePhase = 'ready';
@@ -79,7 +84,10 @@ export class RunnerScene extends Phaser.Scene {
   private speed = START_SPEED;
   private score = 0;
   private coins = 0;
-  private lives = START_LIVES;
+  private chaseT = 0;
+  private dinoShow = 0;
+  private dinoX = 0;
+  private caughtT = -1; // >= 0 while the catch animation plays
   private lane = 0;
   private px = 0;
   private py = 0;
@@ -111,6 +119,19 @@ export class RunnerScene extends Phaser.Scene {
     this.shadow = this.add.image(0, 0, 'shadow');
     this.player = this.add.image(0, 0, `${this.charId}-run1`).setOrigin(0.5, 0.985);
     this.shieldFx = this.add.image(0, 0, 'shieldFx').setVisible(false);
+    this.dino = this.add.image(0, 0, 'dino').setOrigin(0.5, 1).setVisible(false);
+    this.roar = this.add
+      .text(0, 0, 'RAWR!', {
+        fontFamily: '"Baloo 2", Arial, sans-serif',
+        fontSize: '42px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+        stroke: '#3f8f2a',
+        strokeThickness: 8,
+      })
+      .setOrigin(0.5)
+      .setDepth(300000)
+      .setAlpha(0);
 
     this.layout();
     this.scale.on('resize', this.layout, this);
@@ -140,7 +161,10 @@ export class RunnerScene extends Phaser.Scene {
     this.speed = START_SPEED;
     this.score = 0;
     this.coins = 0;
-    this.lives = START_LIVES;
+    this.chaseT = 0;
+    this.dinoShow = 0;
+    this.dinoX = 0;
+    this.caughtT = -1;
     this.lane = 0;
     this.px = 0;
     this.py = 0;
@@ -311,6 +335,7 @@ export class RunnerScene extends Phaser.Scene {
 
   private pickKind(): ObstacleKind {
     const pool: ObstacleKind[] = ['barrier', 'barrier', 'beam', 'beam', 'crate', 'crate'];
+    if (this.dist > 40) pool.push('gap', 'gap');
     if (this.dist > 100) pool.push('train', 'train', 'train');
     return pick(pool);
   }
@@ -323,16 +348,18 @@ export class RunnerScene extends Phaser.Scene {
     const blocked = lanes.slice(0, count);
     const free = lanes.slice(count);
     const kinds = blocked.map(() => this.pickKind());
-    if (count === 3 && !kinds.some((k) => k === 'barrier' || k === 'beam')) kinds[0] = Math.random() < 0.5 ? 'barrier' : 'beam';
+    if (count === 3 && !kinds.some((k) => k === 'barrier' || k === 'beam' || k === 'gap')) {
+      kinds[0] = Math.random() < 0.5 ? 'barrier' : 'beam';
+    }
 
     blocked.forEach((lane, i) => {
       const moving = kinds[i] === 'train' && this.dist > 250 && Math.random() < 0.35;
       this.spawnObstacle(kinds[i], lane, z, moving ? 6 : 0);
     });
 
-    // coins: a trail in a free lane, or an arc over a barrier
+    // coins: a trail in a free lane, or an arc over a barrier / hole
     if (Math.random() < 0.8) {
-      const barrierLane = blocked.find((_, i) => kinds[i] === 'barrier');
+      const barrierLane = blocked.find((_, i) => kinds[i] === 'barrier' || kinds[i] === 'gap');
       if (barrierLane !== undefined && (free.length === 0 || Math.random() < 0.35)) {
         for (let i = -3; i <= 3; i++) {
           const t = i / 3;
@@ -357,6 +384,7 @@ export class RunnerScene extends Phaser.Scene {
     this.animT += dt;
 
     if (this.phase === 'running') this.step(dt);
+    this.updateDino(dt);
     this.render();
   }
 
@@ -383,6 +411,7 @@ export class RunnerScene extends Phaser.Scene {
     }
     this.slideT = Math.max(0, this.slideT - dt);
     this.invulnT = Math.max(0, this.invulnT - dt);
+    this.chaseT = Math.max(0, this.chaseT - dt);
     for (const k of Object.keys(this.powers) as PowerKind[]) this.powers[k] = Math.max(0, this.powers[k] - dt);
 
     // spawning
@@ -465,6 +494,11 @@ export class RunnerScene extends Phaser.Scene {
     if (front > ZP + 0.25 || back < ZP - 0.25) return;
 
     const kind = e.kind as ObstacleKind;
+    if (kind === 'gap') {
+      // only fall when properly over the hole and on the ground
+      if (Math.abs(e.x - this.px) > 0.35 || this.airborne) return;
+      if (Math.abs(e.z - ZP) > e.depth / 2 - 0.15) return;
+    }
     if (kind === 'barrier' && this.py > 0.55) return;
     if (kind === 'beam' && this.slideT > 0) return;
     if (kind === 'crate' && this.py > 0.85) return;
@@ -476,12 +510,42 @@ export class RunnerScene extends Phaser.Scene {
       this.cameras.main.flash(150, 160, 210, 255);
       return;
     }
-    this.lives -= 1;
-    this.invulnT = INVULN_TIME;
     this.cameras.main.shake(220, 0.012);
     this.cameras.main.flash(120, 255, 120, 160);
     bus.emit('hit');
-    if (this.lives <= 0) this.gameOver();
+    if (this.chaseT > 0) {
+      this.caught();
+      return;
+    }
+    // first stumble: the dinosaur shows up and chases for a while
+    this.chaseT = CHASE_TIME;
+    this.invulnT = STUMBLE_GRACE;
+    this.dinoX = this.px;
+    this.showRoar();
+  }
+
+  private showRoar() {
+    this.tweens.killTweensOf(this.roar);
+    this.roar.setAlpha(1).setScale(0.4);
+    this.tweens.add({ targets: this.roar, scale: 1, duration: 260, ease: 'Back.easeOut' });
+    this.tweens.add({ targets: this.roar, alpha: 0, delay: 900, duration: 300 });
+  }
+
+  private caught() {
+    this.caughtT = 0;
+    this.showRoar();
+    this.emitHud();
+    this.setPhase('over');
+    this.time.delayedCall(900, () =>
+      bus.emit('gameover', { score: Math.floor(this.score), coins: this.coins, distance: Math.floor(this.dist) }),
+    );
+  }
+
+  private updateDino(dt: number) {
+    const target = this.chaseT > 0 || this.caughtT >= 0 ? 1 : 0;
+    this.dinoShow += (target - this.dinoShow) * Math.min(1, dt * (target ? 5 : 2));
+    this.dinoX += (this.px - this.dinoX) * Math.min(1, dt * 4);
+    if (this.caughtT >= 0) this.caughtT = Math.min(1, this.caughtT + dt * 2.5);
   }
 
   private sparkle(e: Entity, scale = 1) {
@@ -499,17 +563,11 @@ export class RunnerScene extends Phaser.Scene {
     });
   }
 
-  private gameOver() {
-    this.emitHud();
-    this.setPhase('over');
-    bus.emit('gameover', { score: Math.floor(this.score), coins: this.coins, distance: Math.floor(this.dist) });
-  }
-
   private emitHud() {
     const hud: HudState = {
       score: Math.floor(this.score),
       coins: this.coins,
-      lives: this.lives,
+      chase: this.chaseT / CHASE_TIME,
       mult: this.powers.double > 0 ? 2 : 1,
       powers: (Object.keys(this.powers) as PowerKind[])
         .filter((k) => this.powers[k] > 0)
@@ -534,6 +592,7 @@ export class RunnerScene extends Phaser.Scene {
       this.place(e.sprite, e.x, y, e.z, w, e.h);
       // scenery right next to the camera would fill the screen: fade it out
       if (e.type === 'decor') e.sprite.setAlpha(e.sprite.alpha * Phaser.Math.Clamp((e.z - 1.2) / 1.8, 0, 1));
+      if (e.kind === 'gap') e.sprite.setVisible(false); // drawn as part of the ground
     }
 
     // player
@@ -572,6 +631,35 @@ export class RunnerScene extends Phaser.Scene {
       const size = PLAYER_H * 1.25 * c.s * (1 + Math.sin(this.animT * 6) * 0.03);
       this.shieldFx.setPosition(c.x, c.y).setDisplaySize(size, size).setDepth(this.depthFor(ZP) + 6);
     }
+
+    this.renderDino(p.x, p.y, hPx);
+  }
+
+  /** Placed in screen space relative to the player so it works on any aspect ratio. */
+  private renderDino(playerX: number, feetY: number, playerPx: number) {
+    if (this.dinoShow < 0.01) {
+      this.dino.setVisible(false);
+      return;
+    }
+    const s = this.f / DINO_Z;
+    const hPx = DINO_H * s;
+    const c = Phaser.Math.Easing.Cubic.Out(Math.max(0, this.caughtT));
+    // peek from the bottom of the screen, a bit to the side of the runner;
+    // when caught, lunge up and over the runner
+    const offset = 0.4 * (1 - c);
+    const x = Phaser.Math.Linear(this.proj(this.dinoX + offset, 0, DINO_Z).x, playerX, c);
+    const hidden = this.H + 10;
+    const chasing = feetY - playerPx * 0.45;
+    const lunge = feetY - playerPx * 1.1;
+    const top = Phaser.Math.Linear(hidden, Phaser.Math.Linear(chasing, lunge, c), this.dinoShow);
+    const bob = this.phase === 'running' ? Math.abs(Math.sin(this.animT * 10)) * hPx * 0.03 : 0;
+    this.dino
+      .setVisible(true)
+      .setPosition(x, top + hPx - bob)
+      .setDisplaySize(hPx * (200 / 220), hPx)
+      .setAngle(Math.sin(this.animT * 10) * 3)
+      .setDepth(this.depthFor(DINO_Z));
+    this.roar.setPosition(x, top - 20).setFontSize(Math.max(28, Math.round(playerPx * 0.18)));
   }
 
   private place(img: Phaser.GameObjects.Image, x: number, y: number, z: number, w: number, h: number) {
@@ -634,6 +722,19 @@ export class RunnerScene extends Phaser.Scene {
         this.quad(0xf7b7d2, -0.53, -0.47, 0, 0, z0, z1);
         this.quad(0xf7b7d2, 0.47, 0.53, 0, 0, z0, z1);
       }
+    }
+
+    // holes in the bridge: sky below, plus the far wall of the hole
+    const gaps = this.entities.filter((e) => e.kind === 'gap').sort((a, b) => b.z - a.z);
+    for (const e of gaps) {
+      const za = Math.max(e.z - e.depth / 2, zNear);
+      const zb = Math.min(e.z + e.depth / 2, FAR);
+      if (zb <= za) continue;
+      const x0 = e.x - 0.5;
+      const x1 = e.x + 0.5;
+      this.quad(0xbfe2ff, x0, x1, 0, 0, za, zb);
+      this.quad(0x8a5f45, x0, x1, 0, -0.5, zb, zb);
+      this.quad(0x6d4a36, x0, x1, 0, 0, za, za + 0.06);
     }
   }
 }
