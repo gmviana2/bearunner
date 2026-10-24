@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { bus, type GameCommand, type GamePhase, type HudState, type PowerKind } from './bus';
 import { createTextures } from './textures';
+import { loadCharacterId } from '../characters';
 
 /*
  * Pseudo-3D endless runner. The world is a 3-lane track measured in "lane
@@ -70,6 +71,7 @@ export class RunnerScene extends Phaser.Scene {
 
   private entities: Entity[] = [];
   private phase: GamePhase = 'ready';
+  private charId = loadCharacterId();
 
   // run state
   private dist = 0;
@@ -107,7 +109,7 @@ export class RunnerScene extends Phaser.Scene {
     this.ground = this.add.graphics().setDepth(0);
     this.haze = this.add.image(0, 0, 'haze').setOrigin(0, 0).setDepth(1).setAlpha(0.9);
     this.shadow = this.add.image(0, 0, 'shadow');
-    this.player = this.add.image(0, 0, 'mamel1').setOrigin(0.5, 0.985);
+    this.player = this.add.image(0, 0, `${this.charId}-run1`).setOrigin(0.5, 0.985);
     this.shieldFx = this.add.image(0, 0, 'shieldFx').setVisible(false);
 
     this.layout();
@@ -118,9 +120,12 @@ export class RunnerScene extends Phaser.Scene {
 
     this.setupInput();
     const onCmd = (cmd: GameCommand) => this.command(cmd);
+    const onCharacter = (id: string) => (this.charId = id);
     bus.on('cmd', onCmd);
+    bus.on('character', onCharacter);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       bus.off('cmd', onCmd);
+      bus.off('character', onCharacter);
       this.scale.off('resize', this.layout, this);
     });
 
@@ -533,14 +538,14 @@ export class RunnerScene extends Phaser.Scene {
 
     // player
     const running = this.phase === 'running';
-    let tex = 'mamel1';
-    if (this.airborne) tex = 'mamel-jump';
-    else if (this.slideT > 0) tex = 'mamel-slide';
+    let pose = 'run1';
+    if (this.airborne) pose = 'jump';
+    else if (this.slideT > 0) pose = 'slide';
     else if (running || this.phase === 'ready') {
       const period = running ? 0.13 * (START_SPEED / this.speed) + 0.05 : 0.35;
-      tex = Math.floor(this.animT / period) % 2 ? 'mamel2' : 'mamel1';
+      pose = Math.floor(this.animT / period) % 2 ? 'run2' : 'run1';
     }
-    this.player.setTexture(tex);
+    this.player.setTexture(`${this.charId}-${pose}`);
     const bob = !this.airborne && this.slideT <= 0 && running ? Math.abs(Math.sin(this.animT * 18)) * 0.04 : 0;
     const p = this.proj(this.px, this.py + bob, ZP);
     const hPx = PLAYER_H * p.s;

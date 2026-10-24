@@ -21,6 +21,6 @@ export type GameCommand = 'start' | 'pause' | 'resume' | 'restart';
 
 /**
  * Bridge between the Phaser scene and the React UI.
- * Scene → UI: 'hud', 'phase', 'gameover', 'hit'. UI → scene: 'cmd'.
+ * Scene → UI: 'hud', 'phase', 'gameover', 'hit'. UI → scene: 'cmd', 'character'.
  */
 export const bus = new Phaser.Events.EventEmitter();

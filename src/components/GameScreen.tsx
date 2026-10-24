@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import Phaser from 'phaser';
 import { RunnerScene } from '../game/RunnerScene';
 import { bus, type GameCommand, type GameOverInfo, type GamePhase, type HudState, type PowerKind } from '../game/bus';
-import { ART, GAMES } from '../games';
+import { GAMES } from '../games';
+import { CHARACTERS, getCharacter, loadCharacterId, saveCharacterId } from '../characters';
 
 const BEST_KEY = 'bearunner:best:';
 const POWER_LABEL: Record<PowerKind, { icon: string; name: string }> = {
@@ -37,6 +38,14 @@ export default function GameScreen({ gameId }: { gameId: string }) {
   const [result, setResult] = useState<(GameOverInfo & { best: number; record: boolean }) | null>(null);
   const [hurt, setHurt] = useState(false);
   const [best, setBest] = useState(() => readBest(gameId));
+  const [charId, setCharId] = useState(loadCharacterId);
+  const hero = getCharacter(charId);
+
+  const chooseCharacter = (id: string) => {
+    setCharId(id);
+    saveCharacterId(id);
+    bus.emit('character', id);
+  };
 
   useEffect(() => {
     if (!host.current || game?.status !== 'playable') return;
@@ -99,7 +108,7 @@ export default function GameScreen({ gameId }: { gameId: string }) {
 
       <div className="hud">
         <div className="hud-left">
-          <img className="hud-avatar" src={ART.mamel} alt="Mamel" />
+          <img className="hud-avatar" src={hero.portrait} alt={hero.name} />
           <div className="hud-stats">
             <div className="hud-pill score">
               {hud.score.toLocaleString('pt-BR')}
@@ -141,15 +150,30 @@ export default function GameScreen({ gameId }: { gameId: string }) {
       {phase === 'ready' && (
         <div className="overlay">
           <div className="card">
-            <img className="card-hero" src={ART.mamel} alt="" />
             <h2>{game.title}</h2>
-            <p className="muted">{game.subtitle}</p>
+            <p className="muted">{game.subtitle} · escolha quem vai correr</p>
+            <div className="picker" role="radiogroup" aria-label="Personagem">
+              {CHARACTERS.map((c) => (
+                <button
+                  key={c.id}
+                  role="radio"
+                  aria-checked={c.id === charId}
+                  className={c.id === charId ? 'pick active' : 'pick'}
+                  style={{ ['--accent' as string]: c.accent }}
+                  onClick={() => chooseCharacter(c.id)}
+                >
+                  <img src={c.portrait} alt="" />
+                  <span>{c.name}</span>
+                </button>
+              ))}
+            </div>
+            <p className="muted small">{hero.tagline}</p>
             <ul className="controls">
               <li><b>← →</b> ou deslize para os lados: trocar de pista</li>
               <li><b>↑ / espaço</b> ou deslize p/ cima: pular barreiras</li>
               <li><b>↓</b> ou deslize p/ baixo: deslizar sob as vigas</li>
             </ul>
-            <button className="btn btn-primary big" onClick={() => send('start')}>Começar ▶</button>
+            <button className="btn btn-primary big" onClick={() => send('start')}>Correr com {hero.name} ▶</button>
             {best > 0 && <p className="muted small">Seu recorde: {best.toLocaleString('pt-BR')}</p>}
             <a className="link" href="#/">← Voltar à plataforma</a>
           </div>

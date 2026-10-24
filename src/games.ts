@@ -73,5 +73,4 @@ export const EVENTS = [
 export const ART = {
   hero: art('hero'),
   mamel: art('mamel'),
-  visuals: art('visuals'),
 };

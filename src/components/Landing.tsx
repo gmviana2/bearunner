@@ -1,7 +1,9 @@
 import { ART, EVENTS, GAMES } from '../games';
+import { CHARACTERS, saveCharacterId } from '../characters';
 
 const playable = GAMES.filter((g) => g.status === 'playable');
 const upcoming = GAMES.filter((g) => g.status === 'soon');
+const playHref = `#/jogar/${playable[0].id}`;
 
 const HOW_TO = [
   { icon: '↔️', title: 'Troque de pista', text: 'Setas ← → ou deslize para os lados.' },
@@ -32,7 +34,7 @@ export default function Landing() {
         </a>
         <nav>
           <a href="#jogos">Jogos</a>
-          <a href="#personagem">Personagem</a>
+          <a href="#personagens">Personagens</a>
           <a href="#como-jogar">Como jogar</a>
         </nav>
         <a className="btn btn-primary small" href={`#/jogar/${playable[0].id}`}>Jogar</a>
@@ -42,7 +44,7 @@ export default function Landing() {
         <div className="hero-text">
           <span className="badge">✨ Novo · protótipo jogável</span>
           <h1>
-            Corra, pule e <span className="grad">brilhe</span> com a Mamel!
+            Corra, pule e <span className="grad">brilhe</span> no Mamel!
           </h1>
           <p>
             BeaRunner é uma plataforma de jogos de corrida infinita no estilo chibi: mundos mágicos,
@@ -54,13 +56,13 @@ export default function Landing() {
           </div>
           <div className="hero-stats">
             <div><b>1</b><span>jogo disponível</span></div>
+            <div><b>4</b><span>personagens</span></div>
             <div><b>4</b><span>mundos chegando</span></div>
-            <div><b>0</b><span>downloads</span></div>
           </div>
         </div>
         <div className="hero-art">
           <div className="hero-frame">
-            <img src={ART.hero} alt="Mamel correndo pela ponte do Castelo Celeste" />
+            <img src={ART.hero} alt="Corrida pela ponte do Castelo Celeste" />
           </div>
           <img className="hero-mamel" src={ART.mamel} alt="" />
           <span className="float-coin c1">⭐</span>
@@ -113,19 +115,24 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="personagem" className="section character">
-        <div className="char-art">
-          <img src={ART.mamel} alt="Mamel, a heroína chibi" />
+      <section id="personagens" className="section">
+        <div className="section-head">
+          <h2>Escolha sua personagem</h2>
+          <p>Quatro corredoras, cada uma com seu estilo. Quem vai com você?</p>
         </div>
-        <div className="char-text">
-          <span className="badge">Personagem</span>
-          <h2>Conheça a Mamel</h2>
-          <p>
-            Determinada, alegre e sempre em busca de novas aventuras. Com sua mochila de estrela e o
-            rabo de cavalo com mecha rosa, ela corre por mundos mágicos atrás de fragmentos de energia.
-          </p>
-          <h4>Visuais para desbloquear</h4>
-          <img className="visuals" src={ART.visuals} alt="Quatro visuais alternativos da Mamel" loading="lazy" />
+        <div className="characters">
+          {CHARACTERS.map((c) => (
+            <article key={c.id} className="char-card" style={{ ['--accent' as string]: c.accent }}>
+              <img src={c.portrait} alt={c.name} loading="lazy" />
+              <div className="char-body">
+                <h3>{c.name}</h3>
+                <p>{c.tagline}</p>
+                <a className="btn btn-primary small" href={playHref} onClick={() => saveCharacterId(c.id)}>
+                  Correr com {c.name}
+                </a>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 

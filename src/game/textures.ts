@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { CHARACTERS, type Look } from '../characters';
 
 /**
  * All game art is drawn procedurally with Canvas 2D so the prototype has
@@ -8,16 +9,7 @@ import Phaser from 'phaser';
 type Ctx = CanvasRenderingContext2D;
 
 const C = {
-  hair: '#6b3a26',
-  hairDark: '#4f2a1b',
-  hairLight: '#9a5a3a',
-  pink: '#ff4f9a',
-  pinkDark: '#d42f78',
-  hood: '#ec4a86',
-  hoodDark: '#bf2f63',
-  short: '#2b2238',
   skin: '#ffd9c2',
-  skinDark: '#f0b597',
   bag: '#3a3352',
   bagDark: '#28223d',
   star: '#ffcf3a',
@@ -73,10 +65,10 @@ function star(ctx: Ctx, cx: number, cy: number, R: number, r: number, fill: stri
   }
 }
 
-export type MamelPose = 'run1' | 'run2' | 'jump' | 'slide';
+export type RunnerPose = 'run1' | 'run2' | 'jump' | 'slide';
 
-/** Mamel seen from behind, chibi proportions. Canvas 128x160, feet at y≈158. */
-function drawMamel(ctx: Ctx, pose: MamelPose) {
+/** A chibi runner seen from behind. Canvas 128x160, feet at y≈158. */
+function drawRunner(ctx: Ctx, pose: RunnerPose, L: Look) {
   const slide = pose === 'slide';
   const jump = pose === 'jump';
   const r1 = pose === 'run1';
@@ -85,8 +77,8 @@ function drawMamel(ctx: Ctx, pose: MamelPose) {
     rr(ctx, cx - 6, 112, 12, 34 + off, 5, C.skin);
     rr(ctx, cx - 6, 136 + off, 12, 7, 3, C.white);
     rr(ctx, cx - 11, 141 + off, 22, 16, 7, C.white);
-    rr(ctx, cx - 11, 151 + off, 22, 7, 3, '#ff4f8b');
-    if (off < 0) ellipse(ctx, cx, 150 + off, 8, 5, '#ff7aa8');
+    rr(ctx, cx - 11, 151 + off, 22, 7, 3, L.shoeAccent);
+    if (off < 0) ellipse(ctx, cx, 150 + off, 8, 5, L.shoeAccent);
   };
 
   if (!slide) {
@@ -102,39 +94,57 @@ function drawMamel(ctx: Ctx, pose: MamelPose) {
     // legs stretched forward: only the soles peek out on each side
     rr(ctx, 14, 98, 24, 14, 6, C.white);
     rr(ctx, 90, 98, 24, 14, 6, C.white);
-    rr(ctx, 14, 106, 24, 6, 3, '#ff4f8b');
-    rr(ctx, 90, 106, 24, 6, 3, '#ff4f8b');
+    rr(ctx, 14, 106, 24, 6, 3, L.shoeAccent);
+    rr(ctx, 90, 106, 24, 6, 3, L.shoeAccent);
   }
 
-  if (!slide) rr(ctx, 44, 100, 40, 20, 7, C.short);
+  if (!slide) rr(ctx, 44, 100, 40, 20, 7, L.shorts);
+
+  // long hair falls behind the shoulders, so it goes under the body
+  if (L.hairStyle === 'long') {
+    const g = ctx.createLinearGradient(0, 40, 0, 104);
+    g.addColorStop(0, L.hair);
+    g.addColorStop(1, L.hairDark);
+    ctx.beginPath();
+    ctx.moveTo(32, 50);
+    ctx.quadraticCurveTo(28, 90, 40, 102);
+    for (let x = 40; x <= 88; x += 8) {
+      ctx.lineTo(x + 4, 96);
+      ctx.lineTo(x + 8, 104);
+    }
+    ctx.quadraticCurveTo(100, 90, 96, 50);
+    ctx.closePath();
+    ctx.fillStyle = g;
+    ctx.fill();
+  }
 
   // arms
   if (jump) {
-    rr(ctx, 20, 46, 15, 36, 8, C.hood);
-    rr(ctx, 93, 46, 15, 36, 8, C.hood);
+    rr(ctx, 20, 46, 15, 36, 8, L.top);
+    rr(ctx, 93, 46, 15, 36, 8, L.top);
     circle(ctx, 27, 44, 7, C.skin);
     circle(ctx, 101, 44, 7, C.skin);
   } else if (slide) {
-    rr(ctx, 16, 78, 30, 15, 8, C.hood);
-    rr(ctx, 82, 78, 30, 15, 8, C.hood);
+    rr(ctx, 16, 78, 30, 15, 8, L.top);
+    rr(ctx, 82, 78, 30, 15, 8, L.top);
     circle(ctx, 14, 86, 7, C.skin);
     circle(ctx, 114, 86, 7, C.skin);
   } else {
     const ly = r1 ? 64 : 74;
     const ry = r1 ? 74 : 64;
-    rr(ctx, 25, ly, 15, 32, 8, C.hood);
-    rr(ctx, 88, ry, 15, 32, 8, C.hood);
+    rr(ctx, 25, ly, 15, 32, 8, L.top);
+    rr(ctx, 88, ry, 15, 32, 8, L.top);
     circle(ctx, 32, ly + 33, 7, C.skin);
     circle(ctx, 96, ry + 33, 7, C.skin);
   }
 
-  // hoodie body
+  // jacket body
   const bodyGrad = ctx.createLinearGradient(36, 64, 92, 108);
-  bodyGrad.addColorStop(0, '#f45c94');
-  bodyGrad.addColorStop(1, C.hoodDark);
+  bodyGrad.addColorStop(0, L.top);
+  bodyGrad.addColorStop(1, L.topDark);
   rr(ctx, 36, 62, 56, 46, 16, bodyGrad);
-  rr(ctx, 38, 100, 52, 9, 4, C.hoodDark);
-  ellipse(ctx, 64, 66, 22, 8, C.hoodDark);
+  rr(ctx, 38, 100, 52, 9, 4, L.topDark);
+  ellipse(ctx, 64, 66, 22, 8, L.topDark);
 
   // backpack
   rr(ctx, 47, 64, 6, 12, 2, C.bagDark);
@@ -145,7 +155,7 @@ function drawMamel(ctx: Ctx, pose: MamelPose) {
   ctx.fillStyle = C.bagDark;
   ctx.fill();
   star(ctx, 64, 94, 9, 4, C.star);
-  circle(ctx, 84, 101, 4, C.pink);
+  circle(ctx, 84, 101, 4, L.streak);
 
   // ears (half hidden behind the hair)
   circle(ctx, 31, 50, 6, C.skin);
@@ -153,15 +163,15 @@ function drawMamel(ctx: Ctx, pose: MamelPose) {
 
   // hair: big round head + jagged tips
   const hairGrad = ctx.createRadialGradient(54, 26, 6, 64, 44, 40);
-  hairGrad.addColorStop(0, C.hairLight);
-  hairGrad.addColorStop(0.55, C.hair);
-  hairGrad.addColorStop(1, C.hairDark);
+  hairGrad.addColorStop(0, L.hairLight);
+  hairGrad.addColorStop(0.55, L.hair);
+  hairGrad.addColorStop(1, L.hairDark);
+  const tipLen = L.hairStyle === 'short' ? 4 : 10;
   ctx.beginPath();
   ctx.arc(64, 42, 34, Math.PI, 0);
   ctx.lineTo(98, 52);
-  const tips = [92, 84, 76, 68, 60, 52, 44, 36];
-  tips.forEach((x, i) => {
-    ctx.lineTo(x + 4, 66 + (i % 2) * 5);
+  [92, 84, 76, 68, 60, 52, 44, 36].forEach((x, i) => {
+    ctx.lineTo(x + 4, 56 + tipLen + (i % 2) * 5);
     ctx.lineTo(x - 2, 56);
   });
   ctx.lineTo(30, 52);
@@ -169,13 +179,11 @@ function drawMamel(ctx: Ctx, pose: MamelPose) {
   ctx.fillStyle = hairGrad;
   ctx.fill();
 
-  // pink streak
   ctx.globalAlpha = 0.85;
-  ellipse(ctx, 40, 46, 5, 18, C.pink, -0.25);
+  ellipse(ctx, 40, 46, 5, 18, L.streak, -0.25);
   ctx.globalAlpha = 1;
 
-  // strands
-  ctx.strokeStyle = C.hairDark;
+  ctx.strokeStyle = L.hairDark;
   ctx.lineWidth = 2;
   ctx.lineCap = 'round';
   for (const [x2, y2] of [[42, 62], [54, 66], [74, 66], [86, 62]]) {
@@ -184,36 +192,100 @@ function drawMamel(ctx: Ctx, pose: MamelPose) {
     ctx.quadraticCurveTo((64 + x2) / 2 + (x2 < 64 ? -8 : 8), 34, x2, y2);
     ctx.stroke();
   }
-  ellipse(ctx, 50, 24, 12, 4, 'rgba(255,220,190,0.45)', -0.4);
+  ellipse(ctx, 50, 24, 12, 4, 'rgba(255,255,255,0.3)', -0.4);
 
-  // ponytail hanging down the back
-  const sway = jump ? 0 : r1 ? 6 : pose === 'run2' ? -6 : 0;
-  const tipY = jump ? 74 : slide ? 78 : 94;
-  const tailGrad = ctx.createLinearGradient(64, 26, 64, tipY);
-  tailGrad.addColorStop(0, C.hair);
-  tailGrad.addColorStop(1, C.hairDark);
-  ctx.beginPath();
-  ctx.moveTo(55, 28);
-  ctx.quadraticCurveTo(42 + sway, 62, 64 + sway * 2, tipY);
-  ctx.quadraticCurveTo(86 + sway, 62, 73, 28);
-  ctx.closePath();
-  ctx.fillStyle = tailGrad;
-  ctx.fill();
-  ctx.globalAlpha = 0.8;
-  ctx.beginPath();
-  ctx.moveTo(60, 34);
-  ctx.quadraticCurveTo(54 + sway, 60, 62 + sway * 2, tipY - 10);
-  ctx.quadraticCurveTo(60 + sway, 58, 64, 34);
-  ctx.fillStyle = C.pink;
-  ctx.fill();
-  ctx.globalAlpha = 1;
+  if (L.hairStyle === 'ponytail') {
+    const sway = jump ? 0 : r1 ? 6 : pose === 'run2' ? -6 : 0;
+    const tipY = jump ? 74 : slide ? 78 : 94;
+    const tailGrad = ctx.createLinearGradient(64, 26, 64, tipY);
+    tailGrad.addColorStop(0, L.hair);
+    tailGrad.addColorStop(1, L.hairDark);
+    ctx.beginPath();
+    ctx.moveTo(55, 28);
+    ctx.quadraticCurveTo(42 + sway, 62, 64 + sway * 2, tipY);
+    ctx.quadraticCurveTo(86 + sway, 62, 73, 28);
+    ctx.closePath();
+    ctx.fillStyle = tailGrad;
+    ctx.fill();
+    ctx.globalAlpha = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(60, 34);
+    ctx.quadraticCurveTo(54 + sway, 60, 62 + sway * 2, tipY - 10);
+    ctx.quadraticCurveTo(60 + sway, 58, 64, 34);
+    ctx.fillStyle = L.streak;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    circle(ctx, 64, 28, 9, L.accDark);
+    circle(ctx, 64, 27, 7, L.streak);
+  }
 
-  // scrunchie
-  circle(ctx, 64, 28, 9, C.pinkDark);
-  circle(ctx, 64, 27, 7, C.pink);
-  circle(ctx, 61, 24, 2.5, 'rgba(255,255,255,0.7)');
-
+  drawAccessory(ctx, L);
   ctx.restore();
+}
+
+function drawAccessory(ctx: Ctx, L: Look) {
+  if (L.accessory === 'cap') {
+    // cap from behind: crown + snapback opening + strap
+    ctx.beginPath();
+    ctx.arc(64, 40, 36, Math.PI * 1.02, Math.PI * 1.98);
+    ctx.quadraticCurveTo(64, 30, 29, 38);
+    ctx.fillStyle = L.accColor;
+    ctx.fill();
+    rr(ctx, 52, 26, 24, 10, 5, L.hair);
+    rr(ctx, 50, 33, 28, 5, 2, L.accDark);
+    circle(ctx, 64, 6, 4, L.accDark);
+  } else if (L.accessory === 'catHood') {
+    const ear = (x: number, dir: number) => {
+      ctx.beginPath();
+      ctx.moveTo(x - 14 * dir, 22);
+      ctx.lineTo(x + 2 * dir, -2);
+      ctx.lineTo(x + 12 * dir, 26);
+      ctx.closePath();
+      ctx.fillStyle = L.accColor;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x - 6 * dir, 20);
+      ctx.lineTo(x + 2 * dir, 6);
+      ctx.lineTo(x + 7 * dir, 22);
+      ctx.closePath();
+      ctx.fillStyle = '#ffb1c8';
+      ctx.fill();
+    };
+    ear(38, -1);
+    ear(90, 1);
+    const g = ctx.createRadialGradient(56, 26, 6, 64, 44, 42);
+    g.addColorStop(0, '#ffd970');
+    g.addColorStop(0.7, L.accColor);
+    g.addColorStop(1, L.accDark);
+    ctx.beginPath();
+    ctx.arc(64, 44, 37, Math.PI * 0.92, Math.PI * 2.08);
+    ctx.quadraticCurveTo(64, 92, 29, 54);
+    ctx.fillStyle = g;
+    ctx.fill();
+    // little tail stitched to the back of the hood
+    ctx.strokeStyle = L.accDark;
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(64, 62);
+    ctx.quadraticCurveTo(84, 70, 78, 88);
+    ctx.stroke();
+  } else {
+    // headphones: band over the head + glowing cups
+    ctx.strokeStyle = L.accColor;
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.arc(64, 44, 37, Math.PI * 1.05, Math.PI * 1.95);
+    ctx.stroke();
+    for (const x of [28, 100]) {
+      rr(ctx, x - 9, 34, 18, 28, 8, L.accColor);
+      ctx.strokeStyle = L.accDark;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(x - 6, 38, 12, 20, 6);
+      ctx.stroke();
+    }
+  }
 }
 
 function drawCoin(ctx: Ctx) {
@@ -521,9 +593,11 @@ function drawSky(ctx: Ctx) {
 }
 
 export function createTextures(scene: Phaser.Scene) {
-  (['run1', 'run2', 'jump', 'slide'] as MamelPose[]).forEach((pose) =>
-    make(scene, `mamel-${pose}`, 128, 160, (ctx) => drawMamel(ctx, pose)),
-  );
+  for (const ch of CHARACTERS) {
+    (['run1', 'run2', 'jump', 'slide'] as RunnerPose[]).forEach((pose) =>
+      make(scene, `${ch.id}-${pose}`, 128, 160, (ctx) => drawRunner(ctx, pose, ch.look)),
+    );
+  }
   make(scene, 'coin', 64, 64, drawCoin);
   make(scene, 'barrier', 160, 112, drawBarrier);
   make(scene, 'beam', 160, 220, drawBeam);

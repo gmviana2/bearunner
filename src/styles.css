@@ -422,39 +422,59 @@ a {
   margin: 0;
 }
 
-.character {
+.characters {
   display: grid;
-  grid-template-columns: 0.8fr 1.2fr;
-  gap: 40px;
-  align-items: center;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
 }
 
-.char-art img {
-  border-radius: 32px;
-  border: 6px solid #fff;
+.char-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  overflow: hidden;
   box-shadow: var(--shadow);
-  margin: 0 auto;
+  border-top: 6px solid var(--accent);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s;
 }
 
-.char-text h2 {
-  font-size: clamp(2rem, 4vw, 2.8rem);
-  color: var(--purple-d);
-  margin-top: 12px;
+.char-card:hover {
+  transform: translateY(-4px);
 }
 
-.char-text p {
+.char-card img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: 50% 0%;
+}
+
+.char-body {
+  padding: 14px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1;
+}
+
+.char-body h3 {
+  font-size: 1.6rem;
+  color: var(--accent);
+  margin: 0;
+}
+
+.char-body p {
+  margin: 0;
   color: var(--muted);
-  font-size: 1.05rem;
+  font-size: 0.92rem;
+  flex: 1;
 }
 
-.char-text h4 {
-  margin-top: 20px;
-  color: var(--purple);
-}
-
-.visuals {
-  border-radius: 20px;
-  box-shadow: var(--shadow);
+.char-body .btn {
+  background: var(--accent);
+  box-shadow: none;
 }
 
 .howto {
@@ -614,7 +634,6 @@ a {
 @media (max-width: 900px) {
   .hero,
   .featured,
-  .character,
   .two-col {
     grid-template-columns: 1fr;
   }
@@ -626,7 +645,8 @@ a {
   }
 
   .grid,
-  .howto {
+  .howto,
+  .characters {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -634,9 +654,6 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .char-art img {
-    max-width: 320px;
-  }
 }
 
 @media (max-width: 560px) {
@@ -725,7 +742,7 @@ a {
   width: 64px;
   height: 64px;
   object-fit: cover;
-  object-position: 50% 8%;
+  object-position: 50% 16%;
   border-radius: 50%;
   border: 4px solid #fff;
   box-shadow: 0 4px 12px rgba(60, 20, 120, 0.3);
@@ -881,14 +898,43 @@ a {
   margin: 0;
 }
 
-.card-hero {
-  width: 110px;
-  height: 110px;
+.picker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.pick {
+  border: 3px solid transparent;
+  background: var(--lav);
+  border-radius: 16px;
+  padding: 4px 4px 6px;
+  cursor: pointer;
+  font: 800 0.9rem 'Baloo 2', sans-serif;
+  color: var(--muted);
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.pick img {
+  width: 100%;
+  aspect-ratio: 1;
   object-fit: cover;
-  object-position: 50% 10%;
-  border-radius: 50%;
-  border: 5px solid #ffe3f1;
-  margin-top: -4px;
+  object-position: 50% 16%;
+  border-radius: 12px;
+  margin-bottom: 2px;
+}
+
+.pick:hover {
+  transform: translateY(-2px);
+}
+
+.pick.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #fff;
+  box-shadow: 0 6px 14px rgba(92, 50, 170, 0.2);
 }
 
 .muted {
